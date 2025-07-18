@@ -1,5 +1,5 @@
 py-cord==2.4.1
-discord.py==0.0.0  # force à ne pas installer
 Flask==3.0.2
 python-dotenv==1.1.1
 audioop-lts; python_version>='3.13'
+discord.py==0.0.0  # force à ne pas installer
