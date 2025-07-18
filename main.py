@@ -1,7 +1,24 @@
 from flask import Flask
+import subprocess
+import sys
+
+def install_pycord():
+    try:
+        # Désinstallation forcée
+        subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", "discord", "discord.py", "py-cord"], check=True)
+        # Installation depuis la source officielle GitHub v2.4.1
+        subprocess.run([sys.executable, "-m", "pip", "install", "-U", "git+https://github.com/Pycord-Development/pycord.git@v2.4.1"], check=True)
+        print("[INFO] py-cord officiel installé avec succès.")
+    except Exception as e:
+        print(f"[ERROR] Impossible d’installer py-cord proprement : {e}")
+
+install_pycord()
+
+# Maintenant que py-cord est installé proprement, tu peux importer discord en toute sécurité
 import sys
 print(sys.executable)
 import discord
+from discord import app_commands
 import os
 print("Discord module path:", discord.__file__)
 print("Discord version:", discord.__version__)
