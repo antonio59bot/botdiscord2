@@ -18,6 +18,8 @@ install_pycord()
 import sys
 print(sys.executable)
 import discord
+print("[DEBUG] Version Pycord:", discord.__version__)
+print("[DEBUG] app_commands dispo ?", hasattr(discord, "app_commands"))
 from discord import app_commands
 import os
 print("Discord module path:", discord.__file__)
@@ -38,12 +40,6 @@ import json
 import zoneinfo
 from threading import Thread
 from dotenv import load_dotenv
-
-print("=== fichiers présents dans le dossier ===")
-print(os.listdir("."))
-print("DISCORD VERSION:", getattr(discord, '__version__', '???'))
-print("DISCORD MODULE PATH:", discord.__file__)
-print("HAS APP_COMMANDS:", hasattr(discord, 'app_commands'))
 
 load_dotenv()
 
