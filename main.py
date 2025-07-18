@@ -1,7 +1,8 @@
 from flask import Flask
 import os
-from discord import app_commands
 import discord
+from discord.ext import commands
+from discord import app_commands
 import asyncio
 import datetime
 import json
@@ -9,18 +10,18 @@ import zoneinfo
 from threading import Thread
 from dotenv import load_dotenv
 
+# Charger les variables d'environnement (utile si tu testes en local)
+load_dotenv()
+
+# Configuration Flask pour Render
+app = Flask(__name__)
+
 print("=== fichiers présents dans le dossier ===")
 print(os.listdir("."))
 print("DISCORD VERSION:", getattr(discord, '__version__', '???'))
 print("DISCORD MODULE PATH:", discord.__file__)
 print("DISCORD LOCATION:", discord.__file__)
 print("HAS APP_COMMANDS:", hasattr(discord, 'app_commands'))
-
-# Charger les variables d'environnement (utile si tu testes en local)
-load_dotenv()
-
-# Configuration Flask pour Render
-app = Flask(__name__)
 
 @app.route('/')
 def home():
@@ -256,8 +257,11 @@ async def recharger_programmes():
                                        stickers=[sticker] if sticker else None)
                 remove_programme_by_id(p["id"])
 
-            asyncio.create_task(asyncio.sleep(delay))
-            asyncio.create_task(envoyer())
+            async def delayed_send(delay, envoyer):
+                await asyncio.sleep(delay)
+                await envoyer()
+
+asyncio.create_task(delayed_send(delay, envoyer))
 
         except Exception as e:
             print(f"[ERREUR] {prog.get('id')} : {e}")
@@ -277,6 +281,5 @@ if __name__ == "__main__":
     try:
         keep_alive()
         bot.run(os.getenv("DISCORD_TOKEN"))
-        client.run(token)
     except Exception as e:
         print(f"[ERREUR] Démarrage : {e}")
