@@ -1,3 +1,4 @@
 py-cord==2.0.1
 Flask==3.0.2
 python-dotenv
+audioop-lts; python_version>='3.13'
