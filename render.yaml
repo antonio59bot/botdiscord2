@@ -5,7 +5,7 @@ services:
     buildCommand: |
       pip uninstall -y discord discord.py py-cord
       pip cache purge
-      pip install -U --force-reinstall py-cord==2.4.1
+      pip install -U --force-reinstall py-cord==2.3.2
       pip list
       pip show py-cord
       pip freeze > installed.txt
