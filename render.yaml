@@ -4,7 +4,7 @@ services:
     runtime: python
     buildCommand: |
       pip uninstall -y discord discord.py py-cord
-      pip install -U --force-reinstall git+https://github.com/Pycord-Development/pycord.git@2.4.1
+      pip install -U --force-reinstall git+https://github.com/Pycord-Development/pycord.git@main
       pip install -r requirements.txt
     startCommand: python main.py
     envVars:
