@@ -20,7 +20,6 @@ print(sys.executable)
 import discord
 print("[DEBUG] Version Pycord:", discord.__version__)
 print("[DEBUG] app_commands dispo ?", hasattr(discord, "app_commands"))
-from discord import app_commands
 import os
 print("Discord module path:", discord.__file__)
 print("Discord version:", discord.__version__)
