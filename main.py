@@ -10,25 +10,22 @@ import zoneinfo
 from threading import Thread
 from dotenv import load_dotenv
 
-# Charger les variables d'environnement (utile si tu testes en local)
-load_dotenv()
-
-# Configuration Flask pour Render
-app = Flask(__name__)
-
 print("=== fichiers présents dans le dossier ===")
 print(os.listdir("."))
 print("DISCORD VERSION:", getattr(discord, '__version__', '???'))
 print("DISCORD MODULE PATH:", discord.__file__)
-print("DISCORD LOCATION:", discord.__file__)
 print("HAS APP_COMMANDS:", hasattr(discord, 'app_commands'))
+
+load_dotenv()
+
+app = Flask(__name__)
 
 @app.route('/')
 def home():
     return '✅ Le bot est vivant sur Render !'
 
 def run():
-    port = int(os.environ.get("PORT", 8080))  # Compatible Render (PORT dynamique)
+    port = int(os.environ.get("PORT", 8080))
     print(f"[INFO] Flask écoute sur le port {port}")
     app.run(host='0.0.0.0', port=port)
 
@@ -36,7 +33,6 @@ def keep_alive():
     t = Thread(target=run)
     t.start()
 
-# Fichier de sauvegarde
 PROGRAMMES_FILE = "programmes.json"
 TZ = zoneinfo.ZoneInfo("Europe/Paris")
 
@@ -60,7 +56,6 @@ def remove_programme_by_id(prog_id):
     new_programmes = [p for p in programmes if p.get("id") != prog_id]
     save_programmes(new_programmes)
 
-# Configuration du bot
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -103,69 +98,54 @@ async def send_video(interaction: discord.Interaction, url: str, hour: str = Non
             add_programme(prog)
             await interaction.response.send_message(f"⏰ Vidéo programmée pour {target.strftime('%H:%M')}", ephemeral=True)
 
-            await asyncio.sleep(delay)
-            await send()
-            remove_programme_by_id(prog["id"])
+            async def delayed_send():
+                await asyncio.sleep(delay)
+                await send()
+                remove_programme_by_id(prog["id"])
+
+            asyncio.create_task(delayed_send())
+
         except ValueError:
             await interaction.response.send_message("❌ Heure invalide (HH:MM)", ephemeral=True)
     else:
         await send()
         await interaction.response.send_message("✅ Vidéo envoyée !", ephemeral=True)
 
-# Commande /localvideo
-@tree.command(name="localvideo",
-              description="Envoie une vidéo stockée localement (max ~8 Mo)")
+@tree.command(name="localvideo", description="Envoie une vidéo stockée localement (max ~8 Mo)")
 async def send_local(interaction: discord.Interaction):
     try:
         with open("video.mp4", "rb") as f:
             file = discord.File(f, filename="video.mp4")
-            await interaction.response.send_message("🎞️ Vidéo locale :",
-                                                    file=file)
-            print(
-                f"[INFO] Vidéo locale envoyée dans {interaction.channel} à {datetime.datetime.now(TZ)}"
-            )
+            await interaction.response.send_message("🎞️ Vidéo locale :", file=file)
+            print(f"[INFO] Vidéo locale envoyée dans {interaction.channel} à {datetime.datetime.now(TZ)}")
     except FileNotFoundError:
-        await interaction.response.send_message(
-            "⚠️ Le fichier `video.mp4` est introuvable.")
+        await interaction.response.send_message("⚠️ Le fichier `video.mp4` est introuvable.")
 
-
-# Commande /annoncer
-@app_commands.command(name="annoncer",
-                      description="Annonce un message personnalisé")
+@app_commands.command(name="annoncer", description="Annonce un message personnalisé")
 @app_commands.describe(
     message="Message à envoyer",
     role="Mentionner un rôle (optionnel)",
     hour="Programmer l'heure d'envoi (HH:MM, heure française, optionnel)",
     sticker_id="ID d’un autocollant à ajouter (optionnel)")
 @app_commands.checks.has_permissions(administrator=True)
-async def annoncer(interaction: discord.Interaction,
-                   message: str,
-                   role: discord.Role = None,
-                   hour: str = None,
-                   sticker_id: str = None):
+async def annoncer(interaction: discord.Interaction, message: str, role: discord.Role = None, hour: str = None, sticker_id: str = None):
     channel = interaction.channel
     mention = role.mention if role else ""
     message = message.replace("//", "\n")
 
     async def send():
         try:
-            sticker = discord.Object(
-                id=int(sticker_id)) if sticker_id else None
-            await channel.send(
-                content=f"{mention}\n{message}" if mention else message,
-                stickers=[sticker] if sticker else None)
-            print(
-                f"[INFO] Annonce envoyée dans {channel} à {datetime.datetime.now(TZ)}"
-            )
+            sticker = discord.Object(id=int(sticker_id)) if sticker_id else None
+            await channel.send(content=f"{mention}\n{message}" if mention else message,
+                               stickers=[sticker] if sticker else None)
+            print(f"[INFO] Annonce envoyée dans {channel} à {datetime.datetime.now(TZ)}")
         except Exception as e:
-            await interaction.followup.send(f"⚠️ Erreur lors de l’envoi : {e}",
-                                            ephemeral=True)
+            await interaction.followup.send(f"⚠️ Erreur lors de l’envoi : {e}", ephemeral=True)
 
     if hour:
         try:
             now = datetime.datetime.now(TZ)
-            target = datetime.datetime.strptime(hour, "%H:%M").replace(
-                year=now.year, month=now.month, day=now.day, tzinfo=TZ)
+            target = datetime.datetime.strptime(hour, "%H:%M").replace(year=now.year, month=now.month, day=now.day, tzinfo=TZ)
             if target < now:
                 target += datetime.timedelta(days=1)
             delay = (target - now).total_seconds()
@@ -180,44 +160,33 @@ async def annoncer(interaction: discord.Interaction,
                 "time": target.strftime("%Y-%m-%d %H:%M:%S%z")
             }
             add_programme(prog)
-            await interaction.response.send_message(
-                f"⏰ Message programmé pour {target.strftime('%H:%M')}",
-                ephemeral=True)
+            await interaction.response.send_message(f"⏰ Message programmé pour {target.strftime('%H:%M')}", ephemeral=True)
 
-            await asyncio.sleep(delay)
-            await send()
-            remove_programme_by_id(prog["id"])
+            async def delayed_send():
+                await asyncio.sleep(delay)
+                await send()
+                remove_programme_by_id(prog["id"])
+
+            asyncio.create_task(delayed_send())
+
         except ValueError:
-            await interaction.response.send_message(
-                "❌ Heure invalide. Format : HH:MM", ephemeral=True)
+            await interaction.response.send_message("❌ Heure invalide. Format : HH:MM", ephemeral=True)
     else:
         await send()
-        await interaction.response.send_message("✅ Message envoyé !",
-                                                ephemeral=True)
-
+        await interaction.response.send_message("✅ Message envoyé !", ephemeral=True)
 
 tree.add_command(annoncer)
 
-
-# Commande /listemessages
-@tree.command(name="listemessages",
-              description="Liste les messages programmés")
+@tree.command(name="listemessages", description="Liste les messages programmés")
 @app_commands.checks.has_permissions(administrator=True)
 async def liste_messages(interaction: discord.Interaction):
     programmes = load_programmes()
     if not programmes:
-        await interaction.response.send_message("📭 Aucun message programmé.",
-                                                ephemeral=True)
+        await interaction.response.send_message("📭 Aucun message programmé.", ephemeral=True)
         return
-    texte = "\n".join([
-        f"📝 ID: `{p['id']}` | Type: {p['type']} | Heure: {p['time']}"
-        for p in programmes
-    ])
-    await interaction.response.send_message(
-        f"📅 Messages programmés :\n{texte}", ephemeral=True)
+    texte = "\n".join([f"📝 ID: `{p['id']}` | Type: {p['type']} | Heure: {p['time']}" for p in programmes])
+    await interaction.response.send_message(f"📅 Messages programmés :\n{texte}", ephemeral=True)
 
-
-# Commande /annulermessage
 @tree.command(name="annulermessage", description="Annule un message programmé")
 @app_commands.describe(id="ID du message à annuler (voir /listemessages)")
 @app_commands.checks.has_permissions(administrator=True)
@@ -225,14 +194,11 @@ async def annuler_message(interaction: discord.Interaction, id: str):
     programmes = load_programmes()
     match = next((p for p in programmes if p["id"] == id), None)
     if not match:
-        await interaction.response.send_message(
-            "❌ Aucun message trouvé avec cet ID.", ephemeral=True)
+        await interaction.response.send_message("❌ Aucun message trouvé avec cet ID.", ephemeral=True)
         return
     remove_programme_by_id(id)
-    await interaction.response.send_message(
-        f"✅ Message avec l'ID `{id}` annulé.", ephemeral=True)
+    await interaction.response.send_message(f"✅ Message avec l'ID `{id}` annulé.", ephemeral=True)
 
-# Reprogrammation
 async def recharger_programmes():
     programmes = load_programmes()
     now = datetime.datetime.now(TZ)
@@ -257,10 +223,11 @@ async def recharger_programmes():
                                        stickers=[sticker] if sticker else None)
                 remove_programme_by_id(p["id"])
 
-            async def delayed_send(delay, envoyer):
+            async def delayed_send():
                 await asyncio.sleep(delay)
                 await envoyer()
-            asyncio.create_task(delayed_send(delay, envoyer))
+
+            asyncio.create_task(delayed_send())
 
         except Exception as e:
             print(f"[ERREUR] {prog.get('id')} : {e}")
@@ -275,10 +242,6 @@ async def on_ready():
     except Exception as e:
         print(f"[ERREUR] sync : {e}")
 
-# Lancement
 if __name__ == "__main__":
-    try:
-        keep_alive()
-        bot.run(os.getenv("DISCORD_TOKEN"))
-    except Exception as e:
-        print(f"[ERREUR] Démarrage : {e}")
+    keep_alive()
+    bot.run(os.getenv("DISCORD_TOKEN"))
