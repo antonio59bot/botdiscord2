@@ -260,8 +260,7 @@ async def recharger_programmes():
             async def delayed_send(delay, envoyer):
                 await asyncio.sleep(delay)
                 await envoyer()
-
-asyncio.create_task(delayed_send(delay, envoyer))
+            asyncio.create_task(delayed_send(delay, envoyer))
 
         except Exception as e:
             print(f"[ERREUR] {prog.get('id')} : {e}")
