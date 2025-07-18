@@ -9,6 +9,9 @@ import zoneinfo
 from threading import Thread
 from dotenv import load_dotenv
 
+print("=== fichiers présents dans le dossier ===")
+print(os.listdir("."))
+
 # Charger les variables d'environnement (utile si tu testes en local)
 load_dotenv()
 
