@@ -1,9 +1,17 @@
 from flask import Flask
-import os
 import sys
 print(sys.executable)
-from discord.ext import commands
 import discord
+import os
+print("Discord module path:", discord.__file__)
+print("Discord version:", discord.__version__)
+
+# Liste les fichiers dans le dossier discord installé
+discord_folder = os.path.dirname(discord.__file__)
+print("Contenu du dossier discord:", os.listdir(discord_folder))
+
+print("Has app_commands?", hasattr(discord, "app_commands"))
+from discord.ext import commands
 print("Discord version:", discord.__version__)
 print("Has app_commands?", hasattr(discord, "app_commands"))
 from discord import app_commands
