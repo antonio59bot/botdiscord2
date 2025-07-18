@@ -1,7 +1,7 @@
-import discord
 from flask import Flask
 import os
 from discord import app_commands
+import discord
 import asyncio
 import datetime
 import json
