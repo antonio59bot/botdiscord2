@@ -1,7 +1,9 @@
 from flask import Flask
 import os
-import discord
 from discord.ext import commands
+import discord
+print("Discord version:", discord.__version__)
+print("Has app_commands?", hasattr(discord, "app_commands"))
 from discord import app_commands
 import asyncio
 import datetime
