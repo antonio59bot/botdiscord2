@@ -33,7 +33,7 @@ print("Has app_commands?", hasattr(discord, "app_commands"))
 from discord.ext import commands
 print("Discord version:", discord.__version__)
 print("Has app_commands?", hasattr(discord, "app_commands"))
-from discord import app_commands
+import discord.app_commands
 import asyncio
 import datetime
 import json
