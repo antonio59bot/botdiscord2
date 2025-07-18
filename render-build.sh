@@ -7,4 +7,4 @@ pip install -r requirements.txt
 pip uninstall -y discord discord.py
 
 # Réinstaller py-cord
-pip install py-cord==2.4.1
+pip install py-cord==2.4.0
