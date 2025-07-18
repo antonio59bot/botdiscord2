@@ -11,6 +11,9 @@ from dotenv import load_dotenv
 
 print("=== fichiers présents dans le dossier ===")
 print(os.listdir("."))
+print("DISCORD VERSION:", discord.__version__)
+print("DISCORD LOCATION:", discord.__file__)
+print("HAS APP_COMMANDS:", hasattr(discord, 'app_commands'))
 
 # Charger les variables d'environnement (utile si tu testes en local)
 load_dotenv()
