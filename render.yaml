@@ -4,7 +4,7 @@ services:
     runtime: python
     buildCommand: |
       pip uninstall -y discord discord.py py-cord
-      pip install py-cord==2.4.1 --force-reinstall --no-cache-dir
+      pip install -U --force-reinstall py-cord==2.4.1
       pip install -r requirements.txt
     startCommand: python main.py
     envVars:
