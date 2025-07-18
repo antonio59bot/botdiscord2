@@ -270,6 +270,6 @@ async def on_ready():
 if __name__ == "__main__":
     try:
         keep_alive()
-        bot.run(os.environ.get("DISCORD_TOKEN"))
+        bot.run(os.getenv("DISCORD_TOKEN"))
     except Exception as e:
         print(f"[ERREUR] Démarrage : {e}")
