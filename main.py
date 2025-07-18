@@ -1,11 +1,11 @@
 import discord
 from flask import Flask
+import os
 from discord import app_commands
 from discord.ext import commands
 import asyncio
 import datetime
 import json
-import os
 import zoneinfo
 from threading import Thread
 from dotenv import load_dotenv
@@ -271,5 +271,6 @@ if __name__ == "__main__":
     try:
         keep_alive()
         bot.run(os.getenv("DISCORD_TOKEN"))
+        client.run(token)
     except Exception as e:
         print(f"[ERREUR] Démarrage : {e}")
