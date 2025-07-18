@@ -1,5 +1,7 @@
 from flask import Flask
 import os
+import sys
+print(sys.executable)
 from discord.ext import commands
 import discord
 print("Discord version:", discord.__version__)
